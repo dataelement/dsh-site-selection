@@ -1,0 +1,10 @@
+node_modules/
+*.tgz
+.DS_Store
+
+# Overpass 抓取的断点存档，随时可重建，不该进仓库
+src/data/.cache/
+
+# 用户的项目数据默认落在 ~/Documents/DSH 选址项目/，不在这里；
+# 但万一有人把 DSH_SITE_SELECTION_ROOT 指到仓库里，别把它提交上去
+/DSH 选址项目/

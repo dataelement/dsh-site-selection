@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>选址工作台</title>
+  <link rel="stylesheet" href="/api/site-selection/app.css">
+</head>
+<body>
+  <main id="app" class="app" aria-busy="true">
+    <header class="topbar">
+      <h1 id="projectName" class="ctx">正在打开项目…</h1>
+      <span id="syncState" class="sync">同步中…</span>
+      <span class="spacer"></span>
+      <span id="bindState" class="bind" title="绑定的 DSH 会话"></span>
+      <button id="pasteListings" class="button" type="button" title="把铺源文字交给 DSH 解析">⌁ 解析铺源</button>
+    </header>
+
+    <div id="staleBanner" class="stale" hidden>
+      <span>DSH 改动了这个项目，但你有未保存的编辑。</span>
+      <button id="staleReload" class="button small" type="button">丢弃编辑并刷新</button>
+      <button id="staleDismiss" class="button small subtle" type="button">先不管</button>
+    </div>
+
+    <div class="workspace">
+      <aside class="rail">
+        <div class="rail-head">
+          <span>候选点位</span>
+          <button id="railSort" class="rail-sort" type="button" title="切换排序">分数 ↓</button>
+          <b id="siteCount">0</b>
+        </div>
+        <div class="rail-filters" id="railFilters">
+          <button class="chip active" data-filter="all" type="button" title="全部点位">全部</button>
+          <button class="chip" data-filter="tovisit" type="button" title="待踩点">待看</button>
+          <button class="chip" data-filter="visited" type="button" title="已踩点，还没上会">看过</button>
+          <button class="chip" data-filter="review" type="button" title="上会中">上会</button>
+          <button class="chip" data-filter="closed" type="button" title="已签约 / 已否决">定案</button>
+        </div>
+        <div id="siteList" class="site-list"></div>
+      </aside>
+      <button id="toggleRail" class="edge-toggle edge-rail" type="button"
+        aria-label="折叠点位列表"><i>‹</i></button>
+
+      <section class="stage">
+        <nav class="stage-nav">
+          <button class="tab active" data-view="map" type="button">地图</button>
+          <button class="tab" data-view="compare" type="button">我的点位 <span id="compareCount">0</span></button>
+          <button class="tab" data-view="ref" type="button">参照系</button>
+          <button class="tab" data-view="market" type="button" id="marketTab" hidden>铺源</button>
+          <button class="tab" data-view="log" type="button">记录</button>
+        </nav>
+
+        <div id="mapView" class="view map-view">
+          <canvas id="map"></canvas>
+          <div id="mapTools" class="map-tools">
+            <button class="chip" data-cam="reset" type="button" title="复位视角">复位</button>
+            <button class="chip" data-cam="top" type="button" title="俯视">俯视</button>
+            <button class="chip" data-cam="tilt" type="button" title="斜视">斜视</button>
+            <button class="chip sim" id="toggleListings" type="button" hidden
+              title="在租铺源，标签为租金 元/㎡/天">铺源图层</button>
+          </div>
+          <div class="map-search">
+            <input id="searchInput" type="search" placeholder="搜索地点、商场、地铁站或路名" autocomplete="off" spellcheck="false">
+            <div id="searchResults" class="search-results" hidden></div>
+          </div>
+          <div class="map-hint" id="mapHint">点地图任意位置即分析　·　拖动平移 / 右键旋转 / 滚轮缩放</div>
+          <div class="map-legend" id="mapLegend"></div>
+          <div class="map-scale"><small id="camInfo"></small></div>
+        </div>
+
+        <div id="refView" class="view" hidden></div>
+        <div id="compareView" class="view" hidden></div>
+        <div id="marketView" class="view" hidden></div>
+        <div id="logView" class="view" hidden></div>
+      </section>
+
+      <button id="toggleInspector" class="edge-toggle edge-inspector" type="button"
+        aria-label="折叠详情"><i>›</i></button>
+      <aside id="inspector" class="inspector"></aside>
+    </div>
+  </main>
+
+  <div id="modal" class="modal" hidden>
+    <form id="modalForm" class="modal-card">
+      <h2 id="modalTitle"></h2>
+      <p id="modalHint" class="modal-hint"></p>
+      <input id="modalInput" type="text" hidden>
+      <textarea id="modalText" rows="10"></textarea>
+      <div class="modal-actions">
+        <button type="button" id="modalCancel" class="button subtle">取消</button>
+        <button type="submit" class="button primary" id="modalOk">确定</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/api/site-selection/map3d.js"></script>
+  <script type="module" src="/api/site-selection/app.js"></script>
+</body>
+</html>

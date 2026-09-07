@@ -1,0 +1,70 @@
+{
+  "name": "dsh-site-selection",
+  "version": "1.0.0",
+  "description": "门店选址工作台 —— DSH (DeepSeek Harness) 插件：在真实三维城市地图上点任意位置立刻得到选址分析，按你的口头要求批量找点位，踩点后回填，DSH 全程读得懂当前选中的点位。地理数据来自 OpenStreetMap。",
+  "keywords": [
+    "deepseek",
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "workbench",
+    "site-selection",
+    "retail",
+    "选址",
+    "工作台",
+    "openstreetmap"
+  ],
+  "license": "MIT",
+  "author": "liqingb0220-stack",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dataelement/dsh-site-selection.git"
+  },
+  "homepage": "https://github.com/dataelement/dsh-site-selection#readme",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./client": "./lib/client.js",
+    "./model": "./src/model.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "lib",
+    "public",
+    "scripts",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "DATA-LICENSE.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node --check src/index.js && node --check src/model.js && node --check lib/client.js && node --check public/app.js && node --test",
+    "sample": "node scripts/generate-sample.mjs",
+    "fetch-city": "node scripts/fetch-city.mjs",
+    "market": "node scripts/generate-market.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-api-session-controller"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*",
+    "@deepseek-ai/dsh-host-webserver": "*"
+  }
+}
