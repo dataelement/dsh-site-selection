@@ -36,6 +36,23 @@ npm pack --dry-run
 
 包包含客户端、服务端、城市数据与样例。`workbench.json` 仅保留给旧版工具读取；现行市场以 `package.json`、运行时注册和仓库中的真实截图为准。插件加载由宿主插件安装机制完成；注册后才可与市场条目合并。公开市场收录仍需在 `awesome-dsh-workbench` 单独提交目录 PR。
 
+### 发布 GitHub Release 安装包
+
+本包保留 `private: true`，通过 GitHub Release 分发。每次发布前在对应版本的干净提交上执行：
+
+```bash
+npm run check
+npm run pack:release
+```
+
+脚本会使用 `npm pack` 生成 `dist/dsh-site-selection.tgz`，检查市场要求的入口和 bundle patch、8 MiB 下载限制及解包限制，并输出 SHA-256。发布正式 GitHub Release 时，tag 与 `package.json` 版本保持一致（例如 `v1.2.0`），上传这个文件，且每个版本都使用相同的附件名，以便目录累计历史下载次数。发布后，在 `awesome-dsh-workbench` 的 `data/workbenches/dataelement__dsh-site-selection.yml` 中填写：
+
+```yaml
+tarball: https://github.com/dataelement/dsh-site-selection/releases/latest/download/dsh-site-selection.tgz
+```
+
+目录更新和上线由市场仓库另行完成；上传前可用输出的 SHA-256 核对附件。
+
 现行市场元数据草案见 [`docs/market-entry.yml`](docs/market-entry.yml)。该文件用于源仓库审查和后续目录投稿，不会被 Desktop 当成运行时配置。
 
 ## 界面截图

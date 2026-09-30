@@ -1,5 +1,6 @@
 node_modules/
 *.tgz
+dist/
 .DS_Store
 
 # Overpass 抓取的断点存档，随时可重建，不该进仓库
