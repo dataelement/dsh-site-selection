@@ -17,7 +17,7 @@ DSH (DeepSeek Harness) 插件。**在真实三维城市地图上点任意位置�
 - **踩点闭环** — 待看 → 看过 → 上会中 → 签约 / 否决，每一步在列表里一键推进；定案有记录、能撤回
 - **换城市一条命令** — `fetch-city.mjs` 建好数据集，重启即可用，不改代码
 
-## Desktop 工作台适配（1.2.1）
+## Desktop 工作台适配（1.2.2）
 
 需要提供 `desktopWorkbenches.register`、`isActive` 与 `ownsSession` 的 DSH Desktop。安装提供方插件后，在「工作台市场」添加并打开「门店选址」，入口固定、仓库身份和会话归属由 Desktop 管理。运行时 ID 为 `wb-dataelement-dsh-site-selection`；市场条目通过 `legacyWorkbenchIds: [site-selection]` 授权 Desktop 把旧安装的状态、收藏和会话归属迁移到仓库身份。
 
@@ -45,7 +45,7 @@ npm run check
 npm run pack:release
 ```
 
-脚本会使用 `npm pack` 生成 `dist/dsh-site-selection.tgz`，检查市场要求的入口和 bundle patch、8 MiB 下载限制及解包限制，并输出 SHA-256。发布正式 GitHub Release 时，tag 与 `package.json` 版本保持一致（例如 `v1.2.1`），上传这个文件，且每个版本都使用相同的附件名，以便目录累计历史下载次数。发布后，在 `awesome-dsh-workbench` 的 `data/workbenches/dataelement__dsh-site-selection.yml` 中填写：
+脚本会使用 `npm pack` 生成 `dist/dsh-site-selection.tgz`，检查市场要求的入口和 bundle patch、8 MiB 下载限制及解包限制，并输出 SHA-256。发布正式 GitHub Release 时，tag 与 `package.json` 版本保持一致（例如 `v1.2.2`），上传这个文件，且每个版本都使用相同的附件名，以便目录累计历史下载次数。发布后，在 `awesome-dsh-workbench` 的 `data/workbenches/dataelement__dsh-site-selection.yml` 中填写：
 
 ```yaml
 tarball: https://github.com/dataelement/dsh-site-selection/releases/latest/download/dsh-site-selection.tgz
@@ -204,6 +204,6 @@ npm run market        # 重新生成模拟商业数据
 `src/data/` 下的地理数据是 OpenStreetMap 衍生数据库，**ODbL 1.0，具有传染性**——
 © OpenStreetMap contributors。对外分发或商业化前请读 [DATA-LICENSE.md](./DATA-LICENSE.md)。
 
-## 开场白草稿（1.2.1）
+## 开场白草稿（1.2.2）
 
 新建业务项目后，工作台会自动打开工作台会话，把原版开场白追加到原生草稿，由用户确认后发送，不会自动调用模型。打开已有项目时不会自动创建会话；其待准备的开场白仍可在关联会话后追加。尚无会话时先保存待准备内容；创建或打开对应会话后自动追加。同一会话与同一业务资料只准备一次。已有普通文字保留，引用卡片或正在提交的草稿会延后追加，待可用时重试。待准备内容与交付记录保存在当前 Desktop 来源的 localStorage，刷新后继续；清除浏览器存储会清除该记录。

@@ -14,7 +14,7 @@ test('source metadata and runtime registration share one stable workbench identi
   const market = await readFile(new URL('docs/market-entry.yml', root), 'utf8')
 
   assert.equal(pkg.name, 'dsh-site-selection')
-  assert.equal(pkg.version, '1.2.1')
+  assert.equal(pkg.version, '1.2.2')
   assert.equal(pkg.repository.url, `git+${repository}.git`)
   assert.equal(legacy.id, runtimeId)
   assert.deepEqual(legacy.legacyWorkbenchIds, ['site-selection'])
