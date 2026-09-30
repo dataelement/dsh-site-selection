@@ -9,7 +9,7 @@ import { Readable } from 'node:stream'
 const RUNTIME_WORKBENCH_ID = 'wb-dataelement-dsh-site-selection'
 const LEGACY_WORKBENCH_ID = 'site-selection'
 
-async function client(storage = new Map(), { legacyService = false } = {}) {
+async function client(storage = new Map(), { legacyService = false, sessionService = false } = {}) {
   const posts = []
   let plugin, registration, loaderId, current = 's1', draft = '已有草稿', pending, occurrences = []
   const effects = [], callbacks = [], frameWindow = {}
@@ -19,6 +19,14 @@ async function client(storage = new Map(), { legacyService = false } = {}) {
     state,
     subscribe: cb => { callbacks.push(cb); return () => {} },
     register: descriptor => { registration = descriptor; return () => {} },
+  }
+  const ensured = []
+  if (sessionService) desktopWorkbenches.ensureSession = async ({ folder }) => {
+    ensured.push(folder)
+    current = `new-${ensured.length}`
+    state.sessionBindings[current] = workbenchId
+    callbacks.forEach(cb => cb())
+    return current
   }
   if (!legacyService) {
     desktopWorkbenches.isActive = () => state.active === workbenchId && state.added.includes(workbenchId)
@@ -43,7 +51,7 @@ async function client(storage = new Map(), { legacyService = false } = {}) {
   })
   plugin.apply(ctx)
   await new Promise(resolve => setImmediate(resolve))
-  return { plugin, state, storage, posts, workbenchId, loaderId, registration: () => registration,
+  return { plugin, state, storage, posts, ensured, workbenchId, loaderId, registration: () => registration,
     frame: { contentWindow: frameWindow }, event: { origin, source: frameWindow, data: { project: 'project-a' } }, draft: () => draft, chips: (value = true) => { occurrences = value ? [{}] : [] },
     switch: id => { current = id; callbacks.forEach(cb => cb()) }, defer: promise => { pending = promise } }
 }
@@ -192,6 +200,26 @@ test('onboarding queues without native session and restores a single draft deliv
   const reloaded = await client(c.storage); reloaded.switch(null)
   reloaded.state.sessionBindings.new = RUNTIME_WORKBENCH_ID; reloaded.switch('new')
   assert.equal(reloaded.draft(), '已有草稿')
+})
+test('creating a project opens an owned native session and fills its composer once', async () => {
+  const c = await client(new Map(), { sessionService: true })
+  c.switch(null)
+  await c.plugin.openProject('new-business', { createSession: true })
+  assert.deepEqual(c.ensured, ['/business/A'])
+  assert.deepEqual(c.posts.at(-1).body, { sessionId: 'new-1', project: 'new-business' })
+  assert.match(c.draft(), /先帮我选 10 个/)
+  const once = c.draft()
+  c.plugin.flushInitialDraft()
+  assert.equal(c.draft(), once)
+})
+test('a missing session service retains the prompt for later delivery', async () => {
+  const c = await client()
+  c.switch(null)
+  await c.plugin.openProject('new-business', { createSession: true })
+  assert.equal(c.draft(), '已有草稿')
+  c.state.sessionBindings.later = RUNTIME_WORKBENCH_ID
+  c.switch('later')
+  assert.match(c.draft(), /先帮我选 10 个/)
 })
 test('rich draft or hidden workbench retains initial request until its owner is ready', async () => {
   const c = await client(); c.chips(); await c.plugin.openProject('project-a')

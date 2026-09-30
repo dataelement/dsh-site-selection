@@ -17,13 +17,13 @@ Describe what you want to DSH in plain language and it searches with the same mo
 - **Site-visit loop.** To visit → visited → in review → signed / rejected, each step one click in the list. Decisions are recorded and can be reverted.
 - **Add a city with one command.** `fetch-city.mjs` builds the dataset. Restart and it is ready, no code changes.
 
-## Desktop workbench adapter (1.2.0)
+## Desktop workbench adapter (1.2.1)
 
 Requires DSH Desktop exposing `desktopWorkbenches.register`, `isActive`, and `ownsSession`. Once the provider plugin is installed, add and open Store Site Selection from Workbench Market. Desktop owns pinning, repository identity, switching, and session ownership. The runtime ID is `wb-dataelement-dsh-site-selection`; the market entry declares `legacyWorkbenchIds: [site-selection]` so Desktop can migrate state, favorites, and session ownership from older local installations.
 
-The business panel occupies 65% on the left and the native conversation remains the single Agent input. Public navigation, settings, modes, models, tools and permissions stay under Desktop and the current native session. The plugin never creates or opens sessions and never changes DSH workspace membership.
+The business panel occupies 65% on the left and the native conversation remains the single Agent input. Public navigation, settings, modes, models, tools and permissions stay under Desktop and the current native session. Creating a business project asks Desktop to create and open a workbench-owned native session. Opening an existing business project does not create a session.
 
-Open the workbench to select, create and edit a business project immediately. Create a native session in the conversation area only when requesting Agent help. A business project is independent of a native workspace folder. Several sessions can share a business project; each session remembers its own selection in `.desktop-session-projects.json` in the data root. Without a session, the last business selection is stored in localStorage for the current Desktop origin. A new session inherits that selection; explicit existing session mappings take precedence. Legacy project.sessionId is a selection hint only and cannot revive old sessions or workspaces.
+Open the workbench to select, create and edit a business project immediately. Creating a project opens a native session and fills its draft with the onboarding prompt for review; it does not send the prompt. Existing projects remain browsable and editable without a session. A business project is independent of a native workspace folder. Several sessions can share a business project; each session remembers its own selection in `.desktop-session-projects.json` in the data root. Without a session, the last business selection is stored in localStorage for the current Desktop origin. A new session inherits that selection; explicit existing session mappings take precedence. Legacy project.sessionId is a selection hint only and cannot revive old sessions or workspaces.
 
 Switching workbenches or sessions preserves mounted business iframes. Only messages from the active owned session and its exact same-origin frame can append to the native draft, without replacing text or sending it. Save business form changes before leaving the entire workbench page or restarting.
 
@@ -185,6 +185,6 @@ Code is MIT ([LICENSE](./LICENSE)).
 The geographic data under `src/data/` is a derivative database of OpenStreetMap, licensed **ODbL 1.0, which is share-alike**.
 © OpenStreetMap contributors. Read [DATA-LICENSE.md](./DATA-LICENSE.md) before redistributing or commercializing.
 
-## Initial draft (1.2.0)
+## Initial draft (1.2.1)
 
-Creating or first associating business data automatically prepares the original onboarding text in the native draft for user review and sending; it never submits a model request. Without a native session, the text is queued until that business context has an active owned session. Delivery occurs once per session/business pair. Existing plain text is preserved; rich references and in-flight drafts defer insertion and retry when ready. Pending text and delivery records survive reload in localStorage for the current Desktop origin; clearing browser storage removes these records.
+Creating a business project opens a workbench-owned native session and prepares the original onboarding text in its draft for user review and sending; it never submits a model request. Opening an existing project does not create a session, but a pending draft may be delivered when a session is later associated. Without a native session, the text is queued until that business context has an active owned session. Delivery occurs once per session/business pair. Existing plain text is preserved; rich references and in-flight drafts defer insertion and retry when ready. Pending text and delivery records survive reload in localStorage for the current Desktop origin; clearing browser storage removes these records.

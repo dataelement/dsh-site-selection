@@ -17,15 +17,15 @@ DSH (DeepSeek Harness) 插件。**在真实三维城市地图上点任意位置�
 - **踩点闭环** — 待看 → 看过 → 上会中 → 签约 / 否决，每一步在列表里一键推进；定案有记录、能撤回
 - **换城市一条命令** — `fetch-city.mjs` 建好数据集，重启即可用，不改代码
 
-## Desktop 工作台适配（1.2.0）
+## Desktop 工作台适配（1.2.1）
 
 需要提供 `desktopWorkbenches.register`、`isActive` 与 `ownsSession` 的 DSH Desktop。安装提供方插件后，在「工作台市场」添加并打开「门店选址」，入口固定、仓库身份和会话归属由 Desktop 管理。运行时 ID 为 `wb-dataelement-dsh-site-selection`；市场条目通过 `legacyWorkbenchIds: [site-selection]` 授权 Desktop 把旧安装的状态、收藏和会话归属迁移到仓库身份。
 
-业务区域默认在左侧占 65%，可折叠；右侧保留唯一的原生 Agent 会话。插件不覆盖侧边栏、设置、模式切换和公共导航，不创建或跳转会话，也不修改 DSH 工作区。模式、模型、工具和权限遵循当前原生会话。
+业务区域默认在左侧占 65%，可折叠；右侧保留唯一的原生 Agent 会话。插件不覆盖侧边栏、设置、模式切换和公共导航。新建选址项目时会请求 Desktop 建立并打开该工作台的原生会话；模式、模型、工具和权限遵循原生会话。
 
-打开工作台即可在业务面板选择、新建和编辑选址项目，无需先创建原生会话；需要 Agent 帮助时，再在会话区选择工作区并创建会话。**选址项目是业务资料，DSH 工作区是原生项目文件夹**，两者不要求相同。多个会话可以使用同一个选址项目；每个会话记住自己的选址项目选择，重启后恢复。旧 project.sessionId 仅作为兼容的选择提示，不抢占旧会话或恢复旧工作区。
+打开工作台即可在业务面板选择、新建和编辑选址项目。新建项目会自动建立并打开工作台会话，把开场白填入原生草稿供用户确认，不会自动发送；打开已有项目不自动创建会话，仍可在没有会话时浏览和编辑。**选址项目是业务资料，DSH 工作区是原生项目文件夹**，两者不要求相同。多个会话可以使用同一个选址项目；每个会话记住自己的选址项目选择，重启后恢复。旧 project.sessionId 仅作为兼容的选择提示，不抢占旧会话或恢复旧工作区。
 
-会话对应的项目选择保存在数据根目录的 `.desktop-session-projects.json`；尚无会话时，最近选择保存在当前 Desktop 来源的 localStorage。创建第一个会话会继承正在浏览的项目，已有会话的明确选择优先。切换工作台或会话保留已挂载业务 iframe，消息只有在对应工作台和会话处于前台时才会追加到原生草稿，不自动发送，不覆盖原文。离开整个工作台页面或重启前，请保存业务表单修改。
+会话对应的项目选择保存在数据根目录的 `.desktop-session-projects.json`；尚无会话时，最近选择保存在当前 Desktop 来源的 localStorage。新建项目时 Desktop 使用该项目文件夹建立会话；之后创建的会话会继承正在浏览的项目，已有会话的明确选择优先。切换工作台或会话保留已挂载业务 iframe，消息只有在对应工作台和会话处于前台时才会追加到原生草稿，不自动发送，不覆盖原文。离开整个工作台页面或重启前，请保存业务表单修改。
 
 开发及安装包检查：
 
@@ -45,7 +45,7 @@ npm run check
 npm run pack:release
 ```
 
-脚本会使用 `npm pack` 生成 `dist/dsh-site-selection.tgz`，检查市场要求的入口和 bundle patch、8 MiB 下载限制及解包限制，并输出 SHA-256。发布正式 GitHub Release 时，tag 与 `package.json` 版本保持一致（例如 `v1.2.0`），上传这个文件，且每个版本都使用相同的附件名，以便目录累计历史下载次数。发布后，在 `awesome-dsh-workbench` 的 `data/workbenches/dataelement__dsh-site-selection.yml` 中填写：
+脚本会使用 `npm pack` 生成 `dist/dsh-site-selection.tgz`，检查市场要求的入口和 bundle patch、8 MiB 下载限制及解包限制，并输出 SHA-256。发布正式 GitHub Release 时，tag 与 `package.json` 版本保持一致（例如 `v1.2.1`），上传这个文件，且每个版本都使用相同的附件名，以便目录累计历史下载次数。发布后，在 `awesome-dsh-workbench` 的 `data/workbenches/dataelement__dsh-site-selection.yml` 中填写：
 
 ```yaml
 tarball: https://github.com/dataelement/dsh-site-selection/releases/latest/download/dsh-site-selection.tgz
@@ -204,6 +204,6 @@ npm run market        # 重新生成模拟商业数据
 `src/data/` 下的地理数据是 OpenStreetMap 衍生数据库，**ODbL 1.0，具有传染性**——
 © OpenStreetMap contributors。对外分发或商业化前请读 [DATA-LICENSE.md](./DATA-LICENSE.md)。
 
-## 开场白草稿（1.2.0）
+## 开场白草稿（1.2.1）
 
-创建或首次关联业务资料后，工作台会自动准备原版开场白并追加到原生会话草稿，由用户确认后发送，不会自动调用模型。尚无会话时先保存待准备内容；创建或打开对应会话后自动追加。同一会话与同一业务资料只准备一次。已有普通文字保留，引用卡片或正在提交的草稿会延后追加，待可用时重试。待准备内容与交付记录保存在当前 Desktop 来源的 localStorage，刷新后继续；清除浏览器存储会清除该记录。
+新建业务项目后，工作台会自动打开工作台会话，把原版开场白追加到原生草稿，由用户确认后发送，不会自动调用模型。打开已有项目时不会自动创建会话；其待准备的开场白仍可在关联会话后追加。尚无会话时先保存待准备内容；创建或打开对应会话后自动追加。同一会话与同一业务资料只准备一次。已有普通文字保留，引用卡片或正在提交的草稿会延后追加，待可用时重试。待准备内容与交付记录保存在当前 Desktop 来源的 localStorage，刷新后继续；清除浏览器存储会清除该记录。
