@@ -50,6 +50,7 @@
   },
   "scripts": {
     "check": "node --check src/index.js && node --check src/model.js && node --check lib/client.js && node --check public/app.js && node --test",
+    "pack:release": "node scripts/package-release.mjs",
     "sample": "node scripts/generate-sample.mjs",
     "fetch-city": "node scripts/fetch-city.mjs",
     "market": "node scripts/generate-market.mjs"
