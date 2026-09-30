@@ -916,6 +916,12 @@ function validateRequest(req) {
   const origin = req.headers?.origin
   if (origin && origin !== `http://${host}` && origin !== `https://${host}`) return 403
   if (req.headers?.['sec-fetch-site'] === 'cross-site') return 403
+  // Same-origin/localhost checks above only limit *where* a request can come
+  // from, not *who* is sending it. Require the shared token the server was
+  // started with so any local process cannot silently read/write project data.
+  const expected = process.env.DSH_API_TOKEN
+  const supplied = req.headers?.['x-dsh-token'] || (req.headers?.authorization || '').replace(/^Bearer\s+/i, '')
+  if (!expected || supplied !== expected) return 401
   if (req.method === 'POST' && !/^application\/json(?:;|$)/i.test(req.headers?.['content-type'] || '')) return 415
   return 0
 }
