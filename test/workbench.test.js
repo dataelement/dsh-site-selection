@@ -9,17 +9,22 @@ import { Readable } from 'node:stream'
 const RUNTIME_WORKBENCH_ID = 'wb-dataelement-dsh-site-selection'
 const LEGACY_WORKBENCH_ID = 'site-selection'
 
-async function client(storage = new Map(), { legacyService = false, sessionService = false } = {}) {
+async function client(storage = new Map(), { legacyService = false, sessionService = false, realSnapshot = false, publicCurrentSession = true } = {}) {
   const posts = []
   let plugin, registration, loaderId, current = 's1', draft = '已有草稿', pending, occurrences = []
   const effects = [], callbacks = [], frameWindow = {}
   const workbenchId = legacyService ? LEGACY_WORKBENCH_ID : RUNTIME_WORKBENCH_ID
   const state = { active: workbenchId, added: [workbenchId], sessionBindings: { s1: workbenchId, s2: workbenchId, other: 'another' } }
+  const snapshot = () => realSnapshot
+    ? { byId: Object.fromEntries(Object.keys(state.sessionBindings).map(id => [id, { retainedBy: { mainView: id === current ? 1 : 0 } }])) }
+    : { current }
   const desktopWorkbenches = {
     state,
     subscribe: cb => { callbacks.push(cb); return () => {} },
     register: descriptor => { registration = descriptor; return () => {} },
   }
+  if (realSnapshot && publicCurrentSession) desktopWorkbenches.currentSession = () =>
+    Object.keys(snapshot().byId).find(id => snapshot().byId[id].retainedBy.mainView > 0)
   const ensured = []
   if (sessionService) desktopWorkbenches.ensureSession = async ({ folder }) => {
     ensured.push(folder)
@@ -34,7 +39,7 @@ async function client(storage = new Map(), { legacyService = false, sessionServi
   }
   const ctx = {
     effect: fn => effects.push(fn()),
-    sessions: { list: { getSnapshot: () => ({ current }), subscribe: cb => { callbacks.push(cb); return () => {} } }, scope: () => ({ get: () => ({ input: { for: () => ({ state: { getSnapshot: () => ({ draft, occurrences }) }, setDraft: value => { draft = value } }) } }) }) },
+    sessions: { list: { getSnapshot: snapshot, subscribe: cb => { callbacks.push(cb); return () => {} } }, scope: () => ({ get: () => ({ input: { for: () => ({ state: { getSnapshot: () => ({ draft, occurrences }) }, setDraft: value => { draft = value } }) } }) }) },
     desktopWorkbenches,
   }
   const origin = 'http://127.0.0.1:5197'
@@ -211,6 +216,26 @@ test('creating a project opens an owned native session and fills its composer on
   const once = c.draft()
   c.plugin.flushInitialDraft()
   assert.equal(c.draft(), once)
+})
+test('real Desktop summary delivers the prompt after opening a new session', async () => {
+  const c = await client(new Map(), { sessionService: true, realSnapshot: true })
+  c.switch(null)
+  assert.equal(c.plugin.flushInitialDraft(), false)
+  await c.plugin.openProject('new-business', { createSession: true })
+  assert.deepEqual(c.posts.at(-1).body, { sessionId: 'new-1', project: 'new-business' })
+  assert.match(c.draft(), /先帮我选 10 个/)
+  const once = c.draft()
+  c.plugin.flushInitialDraft()
+  assert.equal(c.draft(), once)
+})
+test('real Desktop summary works when public currentSession is unavailable', async () => {
+  const c = await client(new Map(), { realSnapshot: true, publicCurrentSession: false })
+  c.switch(null)
+  await c.plugin.openProject('new-business')
+  assert.equal(c.draft(), '已有草稿')
+  c.state.sessionBindings.fresh = RUNTIME_WORKBENCH_ID
+  c.switch('fresh')
+  assert.match(c.draft(), /先帮我选 10 个/)
 })
 test('a missing session service retains the prompt for later delivery', async () => {
   const c = await client()
